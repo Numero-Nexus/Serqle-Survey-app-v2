@@ -12,6 +12,7 @@ import { SurveyNavigation } from "./survey-navigation";
 import { SurveyProgressIndicator } from "./survey-progress-indicator";
 import { registerSurveyQuestions } from "./register-questions";
 import { ValidationDisplayProvider } from "./validation-display-context";
+import { ResearchInstrumentationBridge } from "./research-instrumentation-bridge";
 
 registerSurveyQuestions();
 
@@ -31,6 +32,7 @@ export function SurveyFlow() {
           {phase === "survey" && (
             <SurveyProvider survey={freeTimeSurvey}>
               <ValidationDisplayProvider>
+                <ResearchInstrumentationBridge />
                 <SurveyProgressIndicator />
                 <SurveyRenderer />
                 <SurveyNavigation onComplete={() => setPhase("done")} />
