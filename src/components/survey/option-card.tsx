@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +12,7 @@ interface OptionCardProps {
   role?: "radio" | "checkbox";
 }
 
-export function OptionCard({
+export const OptionCard = memo(function OptionCard({
   label,
   icon: Icon,
   selected,
@@ -33,7 +34,7 @@ export function OptionCard({
       )}
     >
       <Icon aria-hidden="true" className="h-5 w-5 shrink-0" />
-      <span>{label}</span>
+     <span>{label}</span>
     </button>
   );
-}
+});

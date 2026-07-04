@@ -11,6 +11,7 @@ import { SurveyRenderer } from "./survey-renderer";
 import { SurveyNavigation } from "./survey-navigation";
 import { SurveyProgressIndicator } from "./survey-progress-indicator";
 import { registerSurveyQuestions } from "./register-questions";
+import { ValidationDisplayProvider } from "./validation-display-context";
 
 registerSurveyQuestions();
 
@@ -20,7 +21,7 @@ export function SurveyFlow() {
   const [phase, setPhase] = useState<Phase>("welcome");
 
   return (
-    <main className="flex-1 py-8 sm:py-12">
+    <main className="flex-1 min-h-dvh safe-area-px safe-area-py sm:py-12">
       <Container>
         <Card className="flex flex-col gap-6 max-w-md mx-auto">
           {phase === "welcome" && (
@@ -29,9 +30,11 @@ export function SurveyFlow() {
 
           {phase === "survey" && (
             <SurveyProvider survey={freeTimeSurvey}>
-              <SurveyProgressIndicator />
-              <SurveyRenderer />
-              <SurveyNavigation onComplete={() => setPhase("done")} />
+              <ValidationDisplayProvider>
+                <SurveyProgressIndicator />
+                <SurveyRenderer />
+                <SurveyNavigation onComplete={() => setPhase("done")} />
+              </ValidationDisplayProvider>
             </SurveyProvider>
           )}
 

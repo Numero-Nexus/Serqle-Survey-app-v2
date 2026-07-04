@@ -1,9 +1,11 @@
 "use client";
 
+import { useRef } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSurveyNavigation } from "@/hooks/use-survey-navigation";
 import { useSurveyValidation } from "@/hooks/use-survey-validation";
+import { useValidationDisplay } from "./validation-display-context";
 
 interface SurveyNavigationProps {
   /** Called when Next is pressed on the final engine screen. */
@@ -13,14 +15,21 @@ interface SurveyNavigationProps {
 export function SurveyNavigation({ onComplete }: SurveyNavigationProps) {
   const { canGoNext, canGoPrevious, goNext, goPrevious } = useSurveyNavigation();
   const { valid } = useSurveyValidation();
+  const { markAttempted } = useValidationDisplay();
+  const completingRef = useRef(false);
 
   function handleNext() {
-    if (!valid) return;
+    if (!valid) {
+      markAttempted();
+      return;
+    }
     if (canGoNext) {
       goNext();
-    } else {
-      onComplete?.();
+      return;
     }
+    if (completingRef.current) return;
+    completingRef.current = true;
+    onComplete?.();
   }
 
   return (

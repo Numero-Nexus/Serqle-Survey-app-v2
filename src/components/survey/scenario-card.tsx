@@ -22,7 +22,7 @@ export function ScenarioCard({ prompt, error, children }: ScenarioCardProps) {
         {children}
       </div>
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 error-message">
           {error}
         </p>
       )}

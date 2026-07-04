@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useSurvey } from "./use-survey";
 import {
   canGoNext,
@@ -30,10 +30,17 @@ export function useSurveyNavigation() {
     [dispatch, state]
   );
 
+  const guards = useMemo(
+    () => ({
+      canGoNext: canGoNext(state),
+      canGoPrevious: canGoPrevious(state),
+    }),
+    [state]
+  );
+
   return {
     currentScreenIndex: state.currentScreenIndex,
-    canGoNext: canGoNext(state),
-    canGoPrevious: canGoPrevious(state),
+    ...guards,
     goNext,
     goPrevious,
     goToScreen,

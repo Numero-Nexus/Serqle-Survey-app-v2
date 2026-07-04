@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useSurvey } from "@/hooks/use-survey";
 import { useSurveyValidation } from "@/hooks/use-survey-validation";
 import { QuestionRenderer } from "./question-renderer";
+import { useValidationDisplay } from "./validation-display-context";
 
 /**
  * Renders all questions on the current screen. Content-agnostic:
@@ -11,7 +13,15 @@ import { QuestionRenderer } from "./question-renderer";
 export function SurveyRenderer() {
   const { state, dispatch } = useSurvey();
   const { errors } = useSurveyValidation();
+  const { hasAttemptedNext, resetAttempted } = useValidationDisplay();
   const currentScreen = state.survey.screens[state.currentScreenIndex];
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    headingRef.current?.focus();
+    resetAttempted();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resetAttempted is stable-in-practice (single setState wrapper); including it would re-run this effect unnecessarily.
+  }, [state.currentScreenIndex]);
 
   if (!currentScreen) {
     return (
@@ -22,7 +32,13 @@ export function SurveyRenderer() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div
+      key={currentScreen.id}
+      className="flex flex-col gap-6 screen-transition"
+    >
+      <h2 ref={headingRef} tabIndex={-1} className="sr-only">
+        {`Screen ${state.currentScreenIndex + 1} of ${state.survey.screens.length}`}
+      </h2>
       {currentScreen.questions.map((question) => (
         <QuestionRenderer
           key={question.id}
@@ -31,7 +47,7 @@ export function SurveyRenderer() {
           onChange={(value) =>
             dispatch({ type: "ANSWER_QUESTION", questionId: question.id, value })
           }
-          error={errors[question.id]}
+          error={hasAttemptedNext ? errors[question.id] : undefined}
         />
       ))}
     </div>
