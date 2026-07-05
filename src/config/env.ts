@@ -12,6 +12,9 @@ const envSchema = z.object({
     .string()
     .url()
     .default("http://localhost:3000"),
+  DATABASE_URL: z
+    .string()
+    .min(1, "DATABASE_URL is required for the Canonical Event Store"),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -20,6 +23,7 @@ function loadEnv(): Env {
   const parsed = envSchema.safeParse({
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    DATABASE_URL: process.env.DATABASE_URL,
   });
 
   if (!parsed.success) {
