@@ -26,7 +26,9 @@ export function useResearchInstrumentation() {
   const { state } = useSurvey();
   const screenEnteredAt = useRef<number>(0);
   const previousScreenIndex = useRef<number>(state.currentScreenIndex);
+  const previousNavIndex = useRef<number>(state.currentScreenIndex);
   const previousAnswers = useRef(state.answers);
+  const revisionCounts = useRef<Record<string, number>>({});
   const hasStarted = useRef(false);
 
 
@@ -109,7 +111,7 @@ export function useResearchInstrumentation() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only re-run on screen index change
   }, [state.currentScreenIndex]);
 
-  // question_answered — on answers map change
+  // question_answered / answer_revised — on answers map change
   useEffect(() => {
     const currentScreen = state.survey.screens[state.currentScreenIndex];
     if (!currentScreen) return;
@@ -117,7 +119,32 @@ export function useResearchInstrumentation() {
     for (const question of currentScreen.questions) {
       const prevValue = previousAnswers.current[question.id];
       const newValue = state.answers[question.id];
-      if (prevValue !== newValue && newValue !== undefined) {
+      if (prevValue === newValue || newValue === undefined) continue;
+
+      const isRevision = prevValue !== undefined && prevValue !== null;
+
+      if (isRevision) {
+        const revisionCount = (revisionCounts.current[question.id] ?? 0) + 1;
+        revisionCounts.current[question.id] = revisionCount;
+
+        surveyEventBus.publish(
+          "answer_revised",
+          createSurveyEvent({
+            category: "interaction",
+            type: "answer_revised",
+            producer: PRODUCER,
+            source: currentScreen.id,
+            versions: VERSIONS,
+            payload: {
+              questionId: question.id,
+              screenId: currentScreen.id,
+              previousValue: prevValue,
+              newValue,
+              revisionCount,
+            },
+          })
+        );
+      } else {
         surveyEventBus.publish(
           "question_answered",
           createSurveyEvent({
@@ -138,4 +165,33 @@ export function useResearchInstrumentation() {
     }
     previousAnswers.current = state.answers;
   }, [state.answers, state.currentScreenIndex, state.survey.screens]);
+
+  // navigation_back / navigation_next — directional, on screen index change
+  useEffect(() => {
+    const prevIndex = previousNavIndex.current;
+    if (prevIndex === state.currentScreenIndex) return;
+
+    const fromScreen = state.survey.screens[prevIndex];
+    const toScreen = state.survey.screens[state.currentScreenIndex];
+    if (!fromScreen || !toScreen) return;
+
+    const isBack = state.currentScreenIndex < prevIndex;
+
+    surveyEventBus.publish(
+      isBack ? "navigation_back" : "navigation_next",
+      createSurveyEvent({
+        category: "navigation",
+        type: isBack ? "navigation_back" : "navigation_next",
+        producer: PRODUCER,
+        source: fromScreen.id,
+        versions: VERSIONS,
+        payload: {
+          fromScreenId: fromScreen.id,
+          toScreenId: toScreen.id,
+        },
+      })
+    );
+
+    previousNavIndex.current = state.currentScreenIndex;
+  }, [state.currentScreenIndex, state.survey.screens]);
 }
