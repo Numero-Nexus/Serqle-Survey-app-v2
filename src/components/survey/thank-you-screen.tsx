@@ -14,6 +14,7 @@ interface ThankYouScreenProps {
 export function ThankYouScreen({ onDone }: ThankYouScreenProps) {
   const [feedback, setFeedback] = useState("");
   const [skipped, setSkipped] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,7 +32,7 @@ export function ThankYouScreen({ onDone }: ThankYouScreenProps) {
         </p>
       </div>
 
-      {!skipped && (
+      {!skipped && !submitted && (
         <div className="flex flex-col gap-2">
           <label
             htmlFor="optional-feedback"
@@ -69,12 +70,21 @@ export function ThankYouScreen({ onDone }: ThankYouScreenProps) {
         </div>
       )}
 
-      <Button
-        variant="primary"
-        onClick={() => onDone(skipped || feedback.trim() === "" ? null : feedback.trim())}
-      >
-        Done
-      </Button>
+      {submitted ? (
+        <p className="text-sm text-center text-muted-foreground" role="status">
+          Thanks — your response has been recorded.
+        </p>
+      ) : (
+        <Button
+          variant="primary"
+          onClick={() => {
+            setSubmitted(true);
+            onDone(skipped || feedback.trim() === "" ? null : feedback.trim());
+          }}
+        >
+          Done
+        </Button>
+      )}
     </div>
   );
 }
