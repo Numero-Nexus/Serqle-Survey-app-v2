@@ -15,6 +15,9 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .min(1, "DATABASE_URL is required for the Canonical Event Store"),
+  BREVO_API_KEY: z.string().min(1, "BREVO_API_KEY is required for transactional email"),
+  EMAIL_FROM: z.string().email("EMAIL_FROM must be a valid email address"),
+  EMAIL_FROM_NAME: z.string().min(1, "EMAIL_FROM_NAME is required"),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -24,6 +27,9 @@ function loadEnv(): Env {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     DATABASE_URL: process.env.DATABASE_URL,
+    BREVO_API_KEY: process.env.BREVO_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME,
   });
 
   if (!parsed.success) {

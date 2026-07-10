@@ -1,0 +1,2 @@
+ALTER TABLE "participant_contacts" ADD COLUMN "thank_you_email_status" text DEFAULT 'pending' NOT NULL;--> statement-breakpoint
+ALTER TABLE "participant_contacts" ADD COLUMN "thank_you_email_sent_at" timestamp with time zone;

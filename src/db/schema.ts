@@ -73,5 +73,32 @@ export const canonicalEvents = pgTable(
   ]
 );
 
+/**
+ * Participant Contact — completely separate from the Canonical Event Store
+ * and research dataset. Contains PII (email) and must never be joined into
+ * or exported alongside behavioural/research data. Linked only via the
+ * existing `participantId`, no new identity system.
+ */
+export const participantContacts = pgTable(
+  "participant_contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    participantId: text("participant_id").notNull(),
+    email: text("email").notNull(),
+    consent: text("consent").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    thankYouEmailStatus: text("thank_you_email_status").notNull().default("pending"), // "pending" | "sent" | "failed"
+    thankYouEmailSentAt: timestamp("thank_you_email_sent_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_participant_contacts_participant_id").on(table.participantId),
+  ]
+);
+
+export type ParticipantContactRow = typeof participantContacts.$inferSelect;
+export type NewParticipantContactRow = typeof participantContacts.$inferInsert;
+
 export type CanonicalEventRow = typeof canonicalEvents.$inferSelect;
 export type NewCanonicalEventRow = typeof canonicalEvents.$inferInsert;

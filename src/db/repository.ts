@@ -1,6 +1,13 @@
 import { eq, asc } from "drizzle-orm";
 import { db } from "./client";
-import { canonicalEvents, type CanonicalEventRow, type NewCanonicalEventRow } from "./schema";
+import {
+  canonicalEvents,
+  type CanonicalEventRow,
+  type NewCanonicalEventRow,
+  participantContacts,
+  type ParticipantContactRow,
+  type NewParticipantContactRow,
+} from "./schema";
 
 /**
  * Repository abstraction over the Canonical Event Store. Intentionally
@@ -51,3 +58,51 @@ export class DrizzleEventRepository implements EventRepository {
 
 /** Singleton repository instance for the application. */
 export const eventRepository: EventRepository = new DrizzleEventRepository();
+
+/**
+ * Repository abstraction over Participant Contacts. Insert-only — no read,
+ * update, or join operations against canonicalEvents live here, keeping PII
+ * storage fully isolated from the research event store.
+ */
+export interface ContactRepository {
+  insertOne(row: NewParticipantContactRow): Promise<ParticipantContactRow>;
+  findById(id: string): Promise<ParticipantContactRow | null>;
+  updateThankYouStatus(
+    id: string,
+    status: "sent" | "failed",
+    sentAt: Date | null
+  ): Promise<void>;
+}
+
+export class DrizzleContactRepository implements ContactRepository {
+  async insertOne(row: NewParticipantContactRow): Promise<ParticipantContactRow> {
+    const [inserted] = await db
+      .insert(participantContacts)
+      .values(row)
+      .returning();
+    return inserted;
+  }
+
+  async findById(id: string): Promise<ParticipantContactRow | null> {
+    const [row] = await db
+      .select()
+      .from(participantContacts)
+      .where(eq(participantContacts.id, id))
+      .limit(1);
+    return row ?? null;
+  }
+
+  async updateThankYouStatus(
+    id: string,
+    status: "sent" | "failed",
+    sentAt: Date | null
+  ): Promise<void> {
+    await db
+      .update(participantContacts)
+      .set({ thankYouEmailStatus: status, thankYouEmailSentAt: sentAt })
+      .where(eq(participantContacts.id, id));
+  }
+}
+
+/** Singleton repository instance for the application. */
+export const contactRepository: ContactRepository = new DrizzleContactRepository();
