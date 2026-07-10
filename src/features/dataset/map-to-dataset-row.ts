@@ -1,6 +1,9 @@
 import type { CanonicalEventRow } from "@/db/schema";
 import type { FeatureExtractionResult } from "../pipeline/orchestrator";
 import { researchDatasetRowSchema, type ResearchDatasetRow } from "./schema";
+import { computeBehaviourMapping, type AnsweredOption } from "@/features/behaviour";
+import { computeConfidenceScore } from "@/features/behaviour/confidence-score";
+import { computeConsistencyScore } from "@/features/behaviour/consistency-score";
 
 /**
  * Maps a FeatureExtractionResult (Step 6) plus session-level provenance
@@ -12,6 +15,49 @@ export function mapToDatasetRow(
   sessionEvents: CanonicalEventRow[]
 ): ResearchDatasetRow {
   const anyEvent = sessionEvents[0];
+
+  const answeredOptions: AnsweredOption[] = Object.entries(result.answerValues)
+    .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+    .map(([questionId, optionId]) => ({ questionId, optionId }));
+
+  let personality: {
+    behaviourVector: Record<string, number> | null;
+    soulCode: string | null;
+    soulArchetype: string | null;
+    confidenceScore: number | null;
+    consistencyScore: number | null;
+  };
+
+  try {
+    const mapping = computeBehaviourMapping(answeredOptions);
+    const confidenceScore = computeConfidenceScore({
+      behaviourVector: mapping.behaviourVector,
+      revisionCount: result.answerRevisionCount,
+      attentionCheckPassed: result.quality.attentionCheckPassed,
+    });
+    const consistencyScore = computeConsistencyScore({
+      isConsistent: result.quality.consistency.isConsistent,
+      revisionCount: result.answerRevisionCount,
+      backNavigationCount: result.navigationBehaviour.backCount,
+    });
+
+    personality = {
+      behaviourVector: mapping.behaviourVector,
+      soulCode: mapping.soulCode,
+      soulArchetype: mapping.soulArchetype,
+      confidenceScore,
+      consistencyScore,
+    };
+  } catch (error) {
+    console.error("[behaviour-engine] mapping failed for session", result.sessionId, error);
+    personality = {
+      behaviourVector: null,
+      soulCode: null,
+      soulArchetype: null,
+      confidenceScore: null,
+      consistencyScore: null,
+    };
+  }
 
   const candidate = {
     provenance: {
@@ -45,6 +91,7 @@ export function mapToDatasetRow(
       backNavigationCount: result.navigationBehaviour.backCount,
       answerRevisionCount: result.answerRevisionCount,
     },
+    personality,
     responseTimeMs: result.responseTimeMs,
     screenDwellTimeMs: result.screenDwellTimeMs,
     questionDwellTimeMs: result.questionDwellTimeMs,

@@ -46,6 +46,19 @@ export const provenanceVariablesSchema = z.object({
   extractedAt: z.string().datetime(),
 });
 
+/**
+ * Personality variables: internal-only inference metadata derived from the
+ * Behaviour Engine. Never exposed to participants. Optional/nullable for
+ * backward compatibility with rows produced before this phase.
+ */
+export const personalityVariablesSchema = z.object({
+  behaviourVector: z.record(z.string(), z.number()).nullable(),
+  soulCode: z.string().nullable(),
+  soulArchetype: z.string().nullable(),
+  confidenceScore: z.number().min(0).max(1).nullable(),
+  consistencyScore: z.number().min(0).max(1).nullable(),
+});
+
 /** The full canonical research dataset row schema. */
 export const researchDatasetRowSchema = z.object({
   provenance: provenanceVariablesSchema,
@@ -53,6 +66,7 @@ export const researchDatasetRowSchema = z.object({
   action: actionVariablesSchema,
   reward: rewardVariablesSchema,
   quality: qualityVariablesSchema,
+  personality: personalityVariablesSchema,
   // Per-question/per-screen timing maps, kept nested since they're keyed data.
   responseTimeMs: z.record(z.string(), z.number()),
   screenDwellTimeMs: z.record(z.string(), z.number()),

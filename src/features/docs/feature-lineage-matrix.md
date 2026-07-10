@@ -15,6 +15,12 @@ concrete lineage for each feature.
 | Session Duration | session_started, session_completed | `deriveSessionDuration` — read totalDurationMs from session_completed payload | totalSessionDurationMs | context.totalSessionDurationMs | 1.0.0 |
 | Interaction Frequency | question_answered | `deriveInteractionFrequency` — count of events | interactionFrequency | context.interactionFrequency | 1.0.0 |
 | Answer Values | question_answered, answer_revised | `deriveAnswerValues` — latest value per question, revisions override originals | answerValues | action.answerValues | 1.0.0 |
-| Missing Response Indicator | (derived from Answer Values + survey definition) | `deriveMissingResponseIndicator` — diff against required questions | missingQuestionIds, hasMissingResponses | quality.missingQuestionIds, quality.hasMissingResponses | 1.0.0 |
+| Missing Response Indicator | (derived from Answer Values + survey definition) |
+| Behaviour Vector | question_answered, answer_revised | `computeBehaviourMapping` — weighted deltas across behaviour dimensions | behaviourVector | personality.behaviourVector | 1.0.0 |
+| Soul Code | (derived from Behaviour Vector) | `generateSoulCode` — banded mapping of representative dimensions | soulCode | personality.soulCode | 1.0.0 |
+| Soul Archetype | (derived from Soul Code) | `mapSoulArchetype` — lookup table on first two Soul Code letters | soulArchetype | personality.soulArchetype | 1.0.0 |
+| Confidence Score | Behaviour Vector, answer_revised, attention check | `computeConfidenceScore` — behaviour strength, reflection, consistency, contradiction penalty | confidenceScore | personality.confidenceScore | 1.0.0 |
+| Consistency Score | isConsistent, answer_revised, navigation_back | `computeConsistencyScore` — baseline consistency minus revision/hesitation penalties | consistencyScore | personality.consistencyScore | 1.0.0 |
+ `deriveMissingResponseIndicator` — diff against required questions | missingQuestionIds, hasMissingResponses | quality.missingQuestionIds, quality.hasMissingResponses | 1.0.0 |
 | Consistency Indicator | (derived from Answer Values, Card 1 & 7) | `deriveConsistencyIndicator` — structural position match | isConsistent | quality.isConsistent | 1.0.0 |
 | Attention Check Indicator | (derived from Answer Values, Card 8) | `deriveAttentionCheckIndicator` — exact-match check | attentionCheckPassed | quality.attentionCheckPassed | 1.0.0 |

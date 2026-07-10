@@ -17,6 +17,11 @@ dataset column.
 | context.interactionFrequency | Engagement (covariate) | Covariate | Research Variable → Dataset Column |
 | quality.isConsistent | Decision Consistency | Cross-validation of H1/H2-style items | Research Variable → Dataset Column |
 | quality.attentionCheckPassed | Data Quality | Data-quality filter | Research Variable → Dataset Column |
+| personality.behaviourVector | Latent Behavioural Dimensions | H1–H25 (cross-cutting, internal inference layer) | Research Variable → Dataset Column |
+| personality.soulCode | Inferred Behavioural Typology | Internal inference — not tied to a single hypothesis | Research Variable → Dataset Column |
+| personality.soulArchetype | Inferred Behavioural Typology (categorical) | Internal inference — not tied to a single hypothesis | Research Variable → Dataset Column |
+| personality.confidenceScore | Inference Reliability (metadata) | Data-quality filter for typology inference | Research Variable → Dataset Column |
+| personality.consistencyScore | Decision Consistency (metadata) | Data-quality filter for typology inference | Research Variable → Dataset Column |
 | reward.finalRewardScore | (none yet) | (none yet) | Feature → Research Variable (NOT YET reached — placeholder only) |
 
 Every populated column (all except `reward.finalRewardScore`) traces

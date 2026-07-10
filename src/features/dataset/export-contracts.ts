@@ -4,6 +4,18 @@ import type { ResearchDatasetRow } from "./schema";
  * Long-format: one row per (sessionId, variableName, value) triple.
  * Useful for statistical tools that expect tidy/long data.
  */
+
+/**
+ * Long-format: one row per (sessionId, variableName, value) triple.
+ * Useful for statistical tools that expect tidy/long data.
+ *
+ * Note: `personality` fields (behaviourVector, soulCode, soulArchetype,
+ * confidenceScore, consistencyScore) are internal-only metadata. They map
+ * to variableGroup "quality" if ever flattened into long format — they are
+ * NOT a new variableGroup, to avoid signalling their significance in
+ * downstream tooling.
+ */
+
 export interface LongFormatRow {
   sessionId: string;
   variableGroup: "context" | "action" | "reward" | "quality";
