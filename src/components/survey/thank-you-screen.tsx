@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { persistContactAction } from "@/db/actions";
 import { getParticipantId } from "@/research/instrumentation/session-identity";
 import { ShareSection } from "@/components/survey/share-section";
-import { SURVEY_URL } from "@/config/env";
+import { SURVEY_URL } from "@/config/public-env";
 
 const MAX_LENGTH = 100;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

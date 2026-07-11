@@ -1,8 +1,11 @@
 import { z } from "zod";
 
 /**
- * Runtime-validated environment schema.
- * Extend this schema in later phases as new env vars (DB URL, auth secrets, etc.) are introduced.
+ * Runtime-validated environment schema — SERVER ONLY.
+ * Do not import this file from any "use client" component; it validates
+ * server secrets (DATABASE_URL, BREVO_API_KEY, etc.) which are stripped to
+ * `undefined` in the browser bundle and will throw. Client components that
+ * need public config should import from "@/config/public-env" instead.
  */
 const envSchema = z.object({
   NODE_ENV: z
@@ -21,7 +24,7 @@ const envSchema = z.object({
 });
 
 export type Env = z.infer<typeof envSchema>;
-export const SURVEY_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
+
 function loadEnv(): Env {
   const parsed = envSchema.safeParse({
     NODE_ENV: process.env.NODE_ENV,
