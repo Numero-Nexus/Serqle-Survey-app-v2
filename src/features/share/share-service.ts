@@ -4,6 +4,29 @@ export interface ShareContent {
   url: string;
 }
 
+export interface CampaignParams {
+  utmSource: string;
+  utmMedium: string;
+  utmCampaign: string;
+}
+
+function withCampaignParams(
+  url: string,
+  platform: SharePlatform | "manual",
+  campaign: CampaignParams
+): string {
+  try {
+    const withParams = new URL(url);
+    withParams.searchParams.set("utm_source", campaign.utmSource);
+    withParams.searchParams.set("utm_medium", campaign.utmMedium);
+    withParams.searchParams.set("utm_campaign", campaign.utmCampaign);
+    withParams.searchParams.set("share_platform", platform);
+    return withParams.toString();
+  } catch {
+    return url;
+  }
+}
+
 export type SharePlatform =
   | "whatsapp"
   | "twitter"
@@ -32,21 +55,38 @@ const PLATFORM_BUILDERS: Record<SharePlatform, (c: ShareContent) => string> = {
     `https://www.reddit.com/submit?url=${encodeURIComponent(c.url)}&title=${encodeURIComponent(c.title)}`,
 };
 
-export function getShareUrl(platform: SharePlatform, content: ShareContent): string {
-  return PLATFORM_BUILDERS[platform](content);
+const DEFAULT_CAMPAIGN: CampaignParams = {
+  utmSource: "share",
+  utmMedium: "social",
+  utmCampaign: "organic-share",
+};
+
+export function getShareUrl(
+  platform: SharePlatform,
+  content: ShareContent,
+  campaign: CampaignParams = DEFAULT_CAMPAIGN
+): string {
+  const taggedContent: ShareContent = {
+    ...content,
+    url: withCampaignParams(content.url, platform, campaign),
+  };
+  return PLATFORM_BUILDERS[platform](taggedContent);
 }
 
 export function isNativeShareSupported(): boolean {
   return typeof navigator !== "undefined" && typeof navigator.share === "function";
 }
 
-export async function nativeShare(content: ShareContent): Promise<boolean> {
+export async function nativeShare(
+  content: ShareContent,
+  campaign: CampaignParams = DEFAULT_CAMPAIGN
+): Promise<boolean> {
   if (!isNativeShareSupported()) return false;
   try {
     await navigator.share({
       title: content.title,
       text: content.description,
-      url: content.url,
+      url: withCampaignParams(content.url, "manual", campaign),
     });
     return true;
   } catch {

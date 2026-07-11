@@ -59,7 +59,23 @@ export const personalityVariablesSchema = z.object({
   consistencyScore: z.number().min(0).max(1).nullable(),
 });
 
+/**
+ * Attribution variables: records how the participant discovered the survey.
+ * Optional/nullable for backward compatibility with rows produced before
+ * this phase; unknown traffic defaults to "direct" upstream, never null source.
+ */
+export const attributionVariablesSchema = z.object({
+  source: z.string().nullable(),
+  medium: z.string().nullable(),
+  campaign: z.string().nullable(),
+  content: z.string().nullable(),
+  term: z.string().nullable(),
+  sharePlatform: z.string().nullable(),
+});
+
+
 /** The full canonical research dataset row schema. */
+
 export const researchDatasetRowSchema = z.object({
   provenance: provenanceVariablesSchema,
   context: contextVariablesSchema,
@@ -67,6 +83,7 @@ export const researchDatasetRowSchema = z.object({
   reward: rewardVariablesSchema,
   quality: qualityVariablesSchema,
   personality: personalityVariablesSchema,
+  attribution: attributionVariablesSchema.nullable().default(null),
   // Per-question/per-screen timing maps, kept nested since they're keyed data.
   responseTimeMs: z.record(z.string(), z.number()),
   screenDwellTimeMs: z.record(z.string(), z.number()),

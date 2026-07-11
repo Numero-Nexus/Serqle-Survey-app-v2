@@ -28,7 +28,7 @@ export function ShareSection({ surveyUrl }: { surveyUrl: string }) {
   const handlePlatformShare = useCallback(
     (platform: SharePlatform) => {
       trackShareAction(platform);
-      const url = getShareUrl(platform, content);
+      const url = getShareUrl(platform, content); // uses DEFAULT_CAMPAIGN
       window.open(url, "_blank", "noopener,noreferrer");
     },
     [content]

@@ -20,6 +20,21 @@ export function mapToDatasetRow(
     .filter((entry): entry is [string, string] => typeof entry[1] === "string")
     .map(([questionId, optionId]) => ({ questionId, optionId }));
 
+  const sessionStartedEvent = sessionEvents.find((e) => e.type === "session_started");
+  const payload = sessionStartedEvent?.payload as Record<string, unknown> | undefined;
+  const rawAttribution = payload?.attribution as
+    | {
+        source: string | null;
+        medium: string | null;
+        campaign: string | null;
+        content: string | null;
+        term: string | null;
+        sharePlatform: string | null;
+      }
+    | undefined;
+
+  const attribution = rawAttribution ?? null;
+
   let personality: {
     behaviourVector: Record<string, number> | null;
     soulCode: string | null;
@@ -92,6 +107,7 @@ export function mapToDatasetRow(
       answerRevisionCount: result.answerRevisionCount,
     },
     personality,
+    attribution,
     responseTimeMs: result.responseTimeMs,
     screenDwellTimeMs: result.screenDwellTimeMs,
     questionDwellTimeMs: result.questionDwellTimeMs,

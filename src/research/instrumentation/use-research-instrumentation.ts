@@ -5,6 +5,7 @@ import { useSurvey } from "@/hooks/use-survey";
 import { surveyEventBus } from "@/research/bus/event-bus";
 import { createSurveyEvent } from "@/research/events/factory";
 import type { EventVersions, EventProducer } from "@/research/events/types";
+import { parseAttributionFromUrl, setAttributionOnce, getAttribution } from "@/features/attribution";
 
 const PRODUCER: EventProducer = { name: "survey-ui", version: "1.0.0" };
 
@@ -48,6 +49,11 @@ export function useResearchInstrumentation() {
         ? "tablet"
         : "desktop";
 
+    setAttributionOnce(
+      parseAttributionFromUrl(typeof window === "undefined" ? "" : window.location.href)
+    );
+    const attribution = getAttribution();
+
     surveyEventBus.publish(
       "session_started",
       createSurveyEvent({
@@ -60,6 +66,7 @@ export function useResearchInstrumentation() {
           deviceType,
           viewportWidth: typeof window === "undefined" ? 0 : window.innerWidth,
           viewportHeight: typeof window === "undefined" ? 0 : window.innerHeight,
+          attribution,
         },
       })
     );
