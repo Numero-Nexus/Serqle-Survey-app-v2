@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { persistContactAction } from "@/db/actions";
 import { getParticipantId } from "@/research/instrumentation/session-identity";
+import { ShareSection } from "@/components/survey/share-section";
+import { SURVEY_URL } from "@/config/env";
 
 const MAX_LENGTH = 100;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -224,7 +226,9 @@ export function ThankYouScreen({ onDone }: ThankYouScreenProps) {
         >
           Done
         </Button>
+        
       )}
+      <ShareSection surveyUrl={SURVEY_URL} />
     </div>
   );
 }

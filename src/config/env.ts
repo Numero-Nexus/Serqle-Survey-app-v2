@@ -21,7 +21,7 @@ const envSchema = z.object({
 });
 
 export type Env = z.infer<typeof envSchema>;
-
+export const SURVEY_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
 function loadEnv(): Env {
   const parsed = envSchema.safeParse({
     NODE_ENV: process.env.NODE_ENV,
