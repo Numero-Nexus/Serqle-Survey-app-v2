@@ -4,7 +4,7 @@
   "description": "A short behavioural research study exploring how people naturally make leisure and free-time decisions.",
   "theme_color": "#ffffff",
   "background_color": "#0a1210",
-  "display": "standalone",
+  "display": "browser",
   "icons": [
     {
       "src": "/icon-192.png",
